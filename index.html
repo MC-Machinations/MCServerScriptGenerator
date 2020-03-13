@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Minecraft Script Generator</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+
+<body>
+  <nav class="navbar navbar-light bg-info">
+    <span class="navbar-brand mb-0 h1">Minecraft Server Script Generator</span>
+  </nav>
+  <div class="container mt-5">
+    <div class="card shadow">
+      <div class="card-body">
+        <h4 class="card-title text-center">Choose options</h4>
+        <div class="container">
+          <form id="main-form" class="needs-validation" novalidate>
+            <div class="form-group row justify-content-center align-items-center">
+              <div class="form-group col-md-5">
+                <label class="col-form-label" for="arch">Architecture</label>
+                <select class="form-control" name="arch" id="arch" required>
+                  <option selected disabled value="">Select one</option>
+                  <option value="paper">Paper</option>
+                  <option value="spigot">Spigot</option>
+                  <option value="craftbukkit">CraftBukkit</option>
+                  <option value="vanilla">Vanilla</option>
+                </select>
+                <div class="invalid-feedback"> Please selected a server architecture. </div>
+              </div>
+              <div class="form-group col-md-5">
+                <label class="col-form-label" for="version">Version</label>
+                <select class="form-control" name="version" id="version" required disabled>
+                  <option selected disabled value="">Select one</option>
+                </select>
+                <div class="invalid-feedback"> Please select a minecraft version. </div>
+              </div>
+              <div class="form-group col-md-2">
+                <label class="col-form-label" for="ram">RAM</label>
+                <select class="form-control" name="ram" id="ram" required>
+                  <option selected disabled value="">Select one</option>
+                  <option value="500M">500MB</option>
+                  <option value="1G">1GB</option>
+                  <option value="2G">2GB</option>
+                  <option value="3G">3GB</option>
+                  <option value="4G">4GB</option>
+                  <option value="5G">5GB</option>
+                  <option value="6G">6GB</option>
+                  <option value="7G">7GB</option>
+                  <option value="8G">8GB</option>
+                  <option value="9G">9GB</option>
+                  <option value="10G">10GB</option>
+                </select>
+                <div class="invalid-feedback"> Please select an amount of RAM. </div>
+              </div>
+              <div class="form-group col-md-10">
+                <div class="form-check">
+                  <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" name="flags" id="flags" value="false" checked> Use
+                    Aikar's flags </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group row justify-content-center">
+              <div class="col-md-12 text-center">
+                <button type="submit" name="generate" id="generate" class="btn btn-success" btn-lg
+                        btn-block">Generate</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+          integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+          integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+          crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+          integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+          crossorigin="anonymous"></script>
+</body>
+<script>
+  function download(filename, content) {
+    var element = document.createElement('a')
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content))
+    element.setAttribute('download', filename)
+    element.style.display = 'none'
+    document.body.appendChild(element)
+    element.click()
+    document.body.removeChild(element)
+  }
+
+  // Example starter JavaScript for disabling form submissions if there are invalid fields
+  (function () {
+    'use strict';
+
+    const versions = {
+      vanilla: [],
+      spigot: [],
+      paper: [],
+      craftbukkit: [],
+    }
+
+    var script = ""
+    var flags = ""
+
+    window.addEventListener('load', () => {
+
+      $.get('https://mc-server-versions-api.glitch.me/flags').done(data => {
+        flags = data
+      }).fail(err => console.error(err))
+
+      $.get('https://mc-server-versions-api.glitch.me/vanilla').done(data => {
+        data.split('\n').forEach(el => {
+          versions.vanilla.push(el.split(' ')[0])
+        })
+      }).fail(err => console.error(err))
+
+      $.get('https://mc-server-versions-api.glitch.me/spigot/versions').done(data => {
+        data.split('\n').forEach(el => {
+          versions.spigot.push(el.split(' ')[0])
+          versions.craftbukkit.push(el.split(' ')[0])
+        })
+      }).fail(err => console.error(err))
+
+      $.get('https://papermc.io/api/v1/paper/').done(data => {
+        versions.paper = data.versions
+      }).fail(err => console.error(err))
+
+      $.get('https://api.github.com/gists/7738eabd8e4cafe7ac6b0f90d2a457e6').done(({ files }) => {
+        // console.log(files)
+        script = files['run.sh'].content
+        // console.log(script)
+      }).fail(err => console.error(err))
+
+      $("#arch").on("change", el => {
+        if (el.target.value === "" || Object.keys(versions).indexOf(el.target.value) < 0) {
+          $("#version")
+            .empty()
+            .append('<option selected disabled value="">Select one</option>')
+            .prop('disabled', true)
+            .val("")
+          return
+        }
+        $("#version")
+          .empty()
+          .append('<option selected disabled value="">Select one</option>')
+          .val("")
+        versions[el.target.value].forEach(v => {
+          $("#version").append('<option>' + v + '</option>')
+        })
+        $("#version").prop("disabled", false)
+      })
+
+      // Fetch all the forms we want to apply custom Bootstrap validation styles to
+      var forms = document.getElementsByClassName('needs-validation');
+      // Loop over them and prevent submission
+      var validation = Array.prototype.filter.call(forms, function (form) {
+        form.addEventListener('submit', function (event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          else { // form is valid, generating script
+            event.preventDefault()
+            // console.log($("#arch").val())
+            // console.log($("#version").val())
+            let tmp_script = script
+              .replace(/ARCH=\n/, "ARCH=" + $("#arch").val() + "\n")
+              .replace(/VERSION=\n/, "VERSION=" + $("#version").val() + "\n")
+              .replace(/RAM=6G\n/, "RAM=" + $("#ram").val() + "\n")
+            if ($("#flags").prop("checked"))
+              tmp_script = tmp_script.replace('-Xmx${RAM} -jar', '-Xmx${RAM} ' + flags + ' -jar')
+            // console.log(script)
+            download('run.sh', tmp_script)
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+
+      // $("#generate").on("click", event => {
+      //   if ($(".main-form").hasClass("was-validated"))
+      //     console.log('valid')
+      //   console.log('generate')
+      //   event.stopPropagation()
+      // })
+
+    }, false);
+  })();
+</script>
+</html>
