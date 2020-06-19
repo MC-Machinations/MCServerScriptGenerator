@@ -57,12 +57,23 @@
                 </select>
                 <div class="invalid-feedback"> Please select an amount of RAM. </div>
               </div>
-              <div class="form-group col-md-10">
+              <div class="form-group col-md-4">
                 <div class="form-check">
                   <label class="form-check-label">
-                    <input type="checkbox" class="form-check-input" name="flags" id="flags" value="false" checked> Use
-                    Aikar's flags </label>
+                    <input type="checkbox" class="form-check-input" name="flags" id="flags"> Use Aikar's flags </label>
                 </div>
+              </div>
+              <div class="form-group col-md-4">
+                <div class="form-check float-right">
+                  <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" name="debug" id="debug"> Enable debugger </label>
+                </div>
+              </div>
+              <div class="form-group col-md-4">
+                <label for="debug_port">Port</label>
+                <input type="number" class="form-control" name="debug_port" id="debug_port" value="5005" disabled
+                       required>
+                <div class="invalid-feedback"> Please selected a valid port number. </div>
               </div>
             </div>
             <div class="form-group row justify-content-center">
@@ -112,6 +123,9 @@
     var script = ""
     var flags = ""
 
+    const DEBUG = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=$PORT$"
+    // debug = debug.replace("$PORT$", "5005")
+
     window.addEventListener('load', () => {
 
       $.get('https://mc-server-versions-api.glitch.me/flags').done(data => {
@@ -160,6 +174,11 @@
         $("#version").prop("disabled", false)
       })
 
+      $("#debug").on("change", el => {
+        if (el.target.checked === true) $("#debug_port").prop("disabled", false)
+        else $("#debug_port").prop("disabled", true)
+      })
+
       // Fetch all the forms we want to apply custom Bootstrap validation styles to
       var forms = document.getElementsByClassName('needs-validation');
       // Loop over them and prevent submission
@@ -171,28 +190,22 @@
           }
           else { // form is valid, generating script
             event.preventDefault()
-            // console.log($("#arch").val())
-            // console.log($("#version").val())
             let tmp_script = script
               .replace(/ARCH=\n/, "ARCH=" + $("#arch").val() + "\n")
               .replace(/VERSION=\n/, "VERSION=" + $("#version").val() + "\n")
               .replace(/RAM=6G\n/, "RAM=" + $("#ram").val() + "\n")
             if ($("#flags").prop("checked"))
               tmp_script = tmp_script.replace('-Xmx${RAM} -jar', '-Xmx${RAM} ' + flags + ' -jar')
-            // console.log(script)
+            if ($("#debug").prop("checked")) {
+              tmp_script = tmp_script.replace("-jar \"${ARCH}", DEBUG + " -jar \"${ARCH}")
+              tmp_script = tmp_script.replace('$PORT$', $("#debug_port").val())
+            }
+            // console.log(tmp_script) // for debugging
             download('run.sh', tmp_script)
           }
           form.classList.add('was-validated');
         }, false);
       });
-
-      // $("#generate").on("click", event => {
-      //   if ($(".main-form").hasClass("was-validated"))
-      //     console.log('valid')
-      //   console.log('generate')
-      //   event.stopPropagation()
-      // })
-
     }, false);
   })();
 </script>
