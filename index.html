@@ -145,8 +145,8 @@
         })
       }).fail(err => console.error(err))
 
-      $.get('https://papermc.io/api/v1/paper/').done(data => {
-        versions.paper = data.versions
+      $.get('https://papermc.io/api/v2/projects/paper/').done(data => {
+        versions.paper = data.versions.reverse()
       }).fail(err => console.error(err))
 
       $.get('https://api.github.com/gists/7738eabd8e4cafe7ac6b0f90d2a457e6').done(({ files }) => {
