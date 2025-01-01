@@ -145,7 +145,7 @@
         })
       }).fail(err => console.error(err))
 
-      $.get('https://papermc.io/api/v2/projects/paper/').done(data => {
+      $.get('https://api.papermc.io/v2/projects/paper/').done(data => {
         versions.paper = data.versions.reverse()
       }).fail(err => console.error(err))
 
